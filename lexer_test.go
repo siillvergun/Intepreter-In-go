@@ -2,13 +2,14 @@ package lexer
 
 import (
 	"testing"
-
 	"monkey/token"
 )
 
 func TestNextToken(t *testing.T) {
 	input := `=+(){},;`
 
+	// 구조체 슬라이스를 만듬
+	// { expectedType = token.ASSIGN, expectedLiteral = "=" } 과 같은 할당문을 슬라이스로 만듬
 	tests := []struct {
 		expectedType    token.TokenType
 		expectedLiteral string
