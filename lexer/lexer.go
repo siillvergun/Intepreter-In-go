@@ -34,7 +34,9 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
-func (l *Lexer) NextToken() token.Token{
+// 반환값이 token.Token, 즉 구조체이고, 매개변수는 *Lexer 타입을 가짐
+// 다음 토큰을 참조하는 함수
+func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
 	switch l.ch {
@@ -57,12 +59,41 @@ func (l *Lexer) NextToken() token.Token{
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+	default:
+		if isletter(l.ch) {
+			tok.Literal = l.readIdentifier()
+			return tok
+		} else {
+			tok = newToken(token.ILLEGAL, l.ch)
+		}
 	}
-
-	l.readChar()
+	
+	l.readChar() // 다음 토큰을 읽어들임
 	return tok
 }
 
+// 매개변수로 들어오는 토큰을 받아서 처리
 func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
+}
+
+// 식별자를 읽는 함수
+// NextToken()함수는 문자를 1개씩 읽어들임. 하지만 식별자는 이름이기 때문에 이어서 읽어야 함
+func (l *Lexer) readIdentifier() string {
+	position := l.position// 식별자가 시작되는 위치를 저장
+
+	// isletter함수로 알파벳과 '-'가 아닐때까지 문자열을 읽는다.
+	for isletter(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+// 식별자의 들어갈 수 있는 문자를 선별하는 함수
+// 따라서 Next_char() 과 같은 이름이 성립가능하게 한다.
+// 만약 abc!!와 같은 이름을 허용하고 싶으면 조건문에 슬쩍 끼워넣으면 됨.
+func isletter(ch byte) bool {
+	return  'a' <= ch && ch <= 'z' ||
+			'A' <= ch && ch <= 'Z' ||
+	  		ch == '_'
 }
